@@ -1,7 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const CodeRain = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [scrollY, setScrollY] = useState(0);
+  const scrollRef = useRef(0);
+
+  // Track scroll position for parallax
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollRef.current = window.scrollY;
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -31,14 +44,22 @@ const CodeRain = () => {
       drops[i] = Math.random() * -100;
     }
 
-    // Track speeds for each column
-    const speeds: number[] = [];
+    // Track speeds for each column (base speeds)
+    const baseSpeeds: number[] = [];
     for (let i = 0; i < columns; i++) {
-      speeds[i] = 0.5 + Math.random() * 1.5;
+      baseSpeeds[i] = 0.5 + Math.random() * 1.5;
+    }
+
+    // Parallax layers - assign each column to a layer (0 = back, 1 = mid, 2 = front)
+    const layers: number[] = [];
+    for (let i = 0; i < columns; i++) {
+      layers[i] = Math.floor(Math.random() * 3);
     }
 
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let lastScrollY = 0;
 
     const draw = () => {
       // Semi-transparent background for trail effect
@@ -47,16 +68,38 @@ const CodeRain = () => {
 
       ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
 
+      // Calculate scroll delta for parallax effect
+      const currentScroll = scrollRef.current;
+      const scrollDelta = currentScroll - lastScrollY;
+      lastScrollY = currentScroll;
+
+      // Parallax multipliers for each layer (back moves slower, front moves faster)
+      const parallaxMultipliers = [0.2, 0.5, 1.0];
+      const opacityMultipliers = [0.4, 0.7, 1.0];
+      const sizeMultipliers = [0.7, 0.85, 1.0];
+
       for (let i = 0; i < drops.length; i++) {
+        const layer = layers[i];
+        const parallaxFactor = parallaxMultipliers[layer];
+        const opacityFactor = opacityMultipliers[layer];
+        const sizeFactor = sizeMultipliers[layer];
+
         // Random character
         const char = charArray[Math.floor(Math.random() * charArray.length)];
         
         const x = i * fontSize;
-        const y = drops[i] * fontSize;
+        
+        // Apply parallax offset based on scroll
+        const parallaxOffset = (currentScroll * parallaxFactor * 0.1) % canvas.height;
+        const y = (drops[i] * fontSize + parallaxOffset) % (canvas.height + 100);
 
         // Create gradient effect - brighter at the head
-        const alpha = Math.min(1, Math.max(0.1, 1 - (drops[i] % 30) / 30));
+        const alpha = Math.min(1, Math.max(0.1, 1 - (drops[i] % 30) / 30)) * opacityFactor;
         
+        // Adjust font size based on layer
+        const layerFontSize = Math.round(fontSize * sizeFactor);
+        ctx.font = `${layerFontSize}px "JetBrains Mono", monospace`;
+
         // Head of the drop is bright white-green
         if (drops[i] % 30 < 2) {
           ctx.fillStyle = `rgba(180, 255, 180, ${alpha})`;
@@ -67,13 +110,17 @@ const CodeRain = () => {
 
         ctx.fillText(char, x, y);
 
+        // Adjust speed based on scroll direction for parallax feel
+        const scrollBoost = scrollDelta * parallaxFactor * 0.05;
+        const speed = baseSpeeds[i] + scrollBoost;
+
         // Reset when off screen
         if (y > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
-          speeds[i] = 0.5 + Math.random() * 1.5;
+          baseSpeeds[i] = 0.5 + Math.random() * 1.5;
         }
 
-        drops[i] += speeds[i];
+        drops[i] += Math.max(0.1, speed);
       }
     };
 
