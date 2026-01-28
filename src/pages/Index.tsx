@@ -2,6 +2,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import CodeRain from '@/components/CodeRain';
 import CursorGlow from '@/components/CursorGlow';
 import ScrollProgress from '@/components/ScrollProgress';
+import BackToTop from '@/components/BackToTop';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/sections/HeroSection';
 import CredibilitySection from '@/components/sections/CredibilitySection';
@@ -22,6 +23,9 @@ const Index = () => {
         
         {/* Scroll progress indicator */}
         <ScrollProgress />
+        
+        {/* Back to top button */}
+        <BackToTop />
         
         {/* Navigation */}
         <Navigation />
