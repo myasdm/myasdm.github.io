@@ -110,14 +110,14 @@ const CaseStudiesSection = () => {
             return (
               <Card
                 key={index}
-                className={`bg-card/50 border-border hover:border-primary/50 transition-all duration-500 overflow-hidden ${
-                  casesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+                className={`group bg-card/50 border-border transition-all duration-300 overflow-hidden cursor-default
+                  hover:border-primary/70 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.3),0_0_20px_hsl(var(--primary)/0.1)]
+                  ${casesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="text-primary" size={24} />
+                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)]">
+                      <Icon className="text-primary transition-transform duration-300 group-hover:scale-110" size={24} />
                     </div>
                     <div className="flex-1">
                       <CardTitle className="text-xl md:text-2xl text-foreground mb-2">
