@@ -1,16 +1,16 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
 import { 
   Zap, 
   Cloud, 
   Radio, 
-  MapPin, 
-  Users, 
-  Calendar, 
-  Globe, 
-  Server 
+  MapPin
 } from 'lucide-react';
 
 const CredibilitySection = () => {
+  const { ref, isVisible } = useScrollReveal();
+  const metricsVisible = useStaggeredReveal(4, isVisible, 100);
+  const domainsVisible = useStaggeredReveal(4, isVisible, 150);
   const { t } = useLanguage();
 
   const metrics = [
@@ -76,7 +76,13 @@ const CredibilitySection = () => {
   ];
 
   return (
-    <section id="credibility" className="py-20 px-4">
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      id="credibility"
+      className={`py-20 px-4 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="container mx-auto max-w-5xl">
         {/* Section header */}
         <div className="text-center mb-16">
@@ -99,7 +105,9 @@ const CredibilitySection = () => {
           {metrics.map((metric, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-lg bg-card/50 border border-border hover:border-primary/50 transition-all duration-300 glow-box"
+              className={`text-center p-6 rounded-lg bg-card/50 border border-border hover:border-primary/50 transition-all duration-500 glow-box ${
+                metricsVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
             >
               <div className="text-4xl md:text-5xl font-bold text-primary glow-primary mb-2">
                 {metric.value}
@@ -121,7 +129,9 @@ const CredibilitySection = () => {
             return (
               <div
                 key={index}
-                className="flex items-start gap-4 p-6 rounded-lg bg-card/30 border border-border hover:border-primary/50 transition-all duration-300 group"
+                className={`flex items-start gap-4 p-6 rounded-lg bg-card/30 border border-border hover:border-primary/50 transition-all duration-500 group ${
+                  domainsVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <Icon className="text-primary" size={24} />

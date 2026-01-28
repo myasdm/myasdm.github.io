@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,6 +9,7 @@ import { Mail, Github, Linkedin, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ContactSection = () => {
+  const { ref, isVisible } = useScrollReveal();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -46,7 +48,13 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contact" className="py-20 px-4">
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      id="contact"
+      className={`py-20 px-4 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="container mx-auto max-w-4xl">
         {/* Section header */}
         <div className="text-center mb-16">

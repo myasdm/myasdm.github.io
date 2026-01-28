@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Button } from '@/components/ui/button';
 import { Mail, ArrowDown } from 'lucide-react';
 
 const HeroSection = () => {
   const { t } = useLanguage();
+  const { ref, isVisible } = useScrollReveal({ threshold: 0.2 });
   const [displayText, setDisplayText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
 
@@ -45,8 +47,11 @@ const HeroSection = () => {
 
   return (
     <section
+      ref={ref as React.RefObject<HTMLElement>}
       id="hero"
-      className="relative min-h-screen flex items-center justify-center px-4 pt-16"
+      className={`relative min-h-screen flex items-center justify-center px-4 pt-16 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
     >
       <div className="container mx-auto max-w-4xl text-center">
         {/* Terminal-style header */}
