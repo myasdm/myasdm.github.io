@@ -1,5 +1,6 @@
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import CodeRain from '@/components/CodeRain';
+import CursorGlow from '@/components/CursorGlow';
 import ScrollProgress from '@/components/ScrollProgress';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/sections/HeroSection';
@@ -15,6 +16,9 @@ const Index = () => {
       <div className="relative min-h-screen bg-background">
         {/* Matrix code rain background */}
         <CodeRain />
+        
+        {/* Mouse-following glow effect */}
+        <CursorGlow />
         
         {/* Scroll progress indicator */}
         <ScrollProgress />
