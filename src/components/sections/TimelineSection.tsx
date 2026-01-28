@@ -1,7 +1,10 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
 import { GraduationCap } from 'lucide-react';
 
 const TimelineSection = () => {
+  const { ref, isVisible } = useScrollReveal();
+  const experiencesVisible = useStaggeredReveal(6, isVisible, 150);
   const { t } = useLanguage();
 
   const experiences = [
@@ -68,7 +71,13 @@ const TimelineSection = () => {
   ];
 
   return (
-    <section id="timeline" className="py-20 px-4 bg-card/20">
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      id="timeline"
+      className={`py-20 px-4 bg-card/20 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="container mx-auto max-w-4xl">
         {/* Section header */}
         <div className="text-center mb-16">
@@ -94,9 +103,9 @@ const TimelineSection = () => {
           {experiences.map((exp, index) => (
             <div
               key={index}
-              className={`relative flex flex-col md:flex-row items-start mb-8 ${
+              className={`relative flex flex-col md:flex-row items-start mb-8 transition-all duration-500 ${
                 index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-              }`}
+              } ${experiencesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
             >
               {/* Timeline dot */}
               <div className="absolute left-0 md:left-1/2 w-3 h-3 rounded-full bg-primary glow-border transform -translate-x-1/2 mt-2" />

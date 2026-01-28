@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
 import { 
   Target, 
   BarChart3, 
@@ -10,6 +11,8 @@ import {
 
 const HowIWorkSection = () => {
   const { t } = useLanguage();
+  const { ref, isVisible } = useScrollReveal();
+  const principlesVisible = useStaggeredReveal(6, isVisible, 100);
 
   const principles = [
     {
@@ -57,7 +60,13 @@ const HowIWorkSection = () => {
   ];
 
   return (
-    <section id="how-i-work" className="py-20 px-4">
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      id="how-i-work"
+      className={`py-20 px-4 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="container mx-auto max-w-5xl">
         {/* Section header */}
         <div className="text-center mb-16">
@@ -82,7 +91,9 @@ const HowIWorkSection = () => {
             return (
               <div
                 key={index}
-                className="group p-6 rounded-lg bg-card/30 border border-border hover:border-primary/50 transition-all duration-300"
+                className={`group p-6 rounded-lg bg-card/30 border border-border hover:border-primary/50 transition-all duration-500 ${
+                  principlesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <Icon className="text-primary" size={20} />

@@ -1,9 +1,12 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Globe, Building2, Radio, ArrowRight } from 'lucide-react';
 
 const CaseStudiesSection = () => {
+  const { ref, isVisible } = useScrollReveal();
+  const casesVisible = useStaggeredReveal(3, isVisible, 200);
   const { t } = useLanguage();
 
   const cases = [
@@ -76,7 +79,13 @@ const CaseStudiesSection = () => {
   ];
 
   return (
-    <section id="cases" className="py-20 px-4 bg-card/20">
+    <section
+      ref={ref as React.RefObject<HTMLElement>}
+      id="cases"
+      className={`py-20 px-4 bg-card/20 transition-all duration-700 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="container mx-auto max-w-5xl">
         {/* Section header */}
         <div className="text-center mb-16">
@@ -101,7 +110,9 @@ const CaseStudiesSection = () => {
             return (
               <Card
                 key={index}
-                className="bg-card/50 border-border hover:border-primary/50 transition-all duration-300 overflow-hidden"
+                className={`bg-card/50 border-border hover:border-primary/50 transition-all duration-500 overflow-hidden ${
+                  casesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-start gap-4">
