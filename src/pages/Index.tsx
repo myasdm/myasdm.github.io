@@ -1,5 +1,6 @@
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import CodeRain from '@/components/CodeRain';
+import ScrollProgress from '@/components/ScrollProgress';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/sections/HeroSection';
 import CredibilitySection from '@/components/sections/CredibilitySection';
@@ -14,6 +15,9 @@ const Index = () => {
       <div className="relative min-h-screen bg-background">
         {/* Matrix code rain background */}
         <CodeRain />
+        
+        {/* Scroll progress indicator */}
+        <ScrollProgress />
         
         {/* Navigation */}
         <Navigation />
