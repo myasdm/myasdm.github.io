@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
+import { useMobileOptimized } from '@/hooks/useMobileOptimized';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +14,7 @@ const ContactSection = () => {
   const staggeredItems = useStaggeredReveal(4, isVisible, 100);
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { shouldReduceAnimations, isMobile } = useMobileOptimized();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -59,22 +61,22 @@ const ContactSection = () => {
     <section
       ref={ref as React.RefObject<HTMLElement>}
       id="contact"
-      className={`py-20 px-4 transition-all duration-700 ${
+      className={`py-20 px-4 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
     >
       <div className="container mx-auto max-w-4xl">
         {/* Section header with animation */}
-        <div className={`text-center mb-16 transition-all duration-700 ${
+        <div className={`text-center mb-16 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} ${
           staggeredItems[0] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <span className="text-primary text-sm font-mono mb-2 block animate-pulse">
+          <span className={`text-primary text-sm font-mono mb-2 block ${shouldReduceAnimations ? '' : 'animate-pulse'}`}>
             {'// '}{t('contact', '联系方式')}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-            <Sparkles className="text-primary animate-pulse" size={28} />
+            <Sparkles className={`text-primary ${shouldReduceAnimations ? '' : 'animate-pulse'}`} size={28} />
             {t("Let's Talk Architecture", '聊聊架构')}
-            <Sparkles className="text-primary animate-pulse" size={28} />
+            <Sparkles className={`text-primary ${shouldReduceAnimations ? '' : 'animate-pulse'}`} size={28} />
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {t(
@@ -86,7 +88,7 @@ const ContactSection = () => {
 
         <div className="grid md:grid-cols-2 gap-12">
           {/* Contact info with enhanced animations */}
-          <div className={`space-y-8 transition-all duration-700 delay-100 ${
+          <div className={`space-y-8 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-100 ${
             staggeredItems[1] ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
           }`}>
             {/* Email card with hover effect */}
@@ -97,16 +99,22 @@ const ContactSection = () => {
               </h3>
               <a
                 href="mailto:songdeming@gmail.com"
-                className="flex items-center gap-4 p-4 rounded-lg bg-card/50 border border-border hover:border-primary transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)]"
+                className={`flex items-center gap-4 p-4 rounded-lg bg-card/50 border border-border hover:border-primary active:border-primary transition-all duration-300 ${
+                  shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)]'
+                }`}
               >
                 <div className="relative">
-                  <div className="absolute inset-0 bg-primary/30 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                    <Mail className="text-primary group-hover:animate-pulse" size={22} />
+                  {!shouldReduceAnimations && (
+                    <div className="absolute inset-0 bg-primary/30 rounded-lg blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  )}
+                  <div className={`relative w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center transition-all duration-300 ${
+                    shouldReduceAnimations ? '' : 'group-hover:bg-primary/20 group-hover:scale-110'
+                  }`}>
+                    <Mail className={`text-primary ${shouldReduceAnimations ? '' : 'group-hover:animate-pulse'}`} size={22} />
                   </div>
                 </div>
                 <div>
-                  <p className="text-foreground font-medium group-hover:text-primary transition-colors duration-300">
+                  <p className={`text-foreground font-medium transition-colors duration-300 ${shouldReduceAnimations ? '' : 'group-hover:text-primary'}`}>
                     songdeming@gmail.com
                   </p>
                   <p className="text-sm text-muted-foreground">
@@ -133,22 +141,24 @@ const ContactSection = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="relative group"
-                      onMouseEnter={() => setHoveredSocial(social.id)}
-                      onMouseLeave={() => setHoveredSocial(null)}
+                      onMouseEnter={() => !isMobile && setHoveredSocial(social.id)}
+                      onMouseLeave={() => !isMobile && setHoveredSocial(null)}
                     >
-                      {/* Glow effect */}
-                      <div className={`absolute inset-0 bg-primary/30 rounded-lg blur-xl transition-opacity duration-300 ${
-                        isHovered ? 'opacity-100' : 'opacity-0'
-                      }`} />
+                      {/* Glow effect - only on desktop */}
+                      {!shouldReduceAnimations && (
+                        <div className={`absolute inset-0 bg-primary/30 rounded-lg blur-xl transition-opacity duration-300 ${
+                          isHovered ? 'opacity-100' : 'opacity-0'
+                        }`} />
+                      )}
                       
                       {/* Button */}
                       <div className={`relative w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300 ${
                         isHovered 
-                          ? 'bg-primary scale-110 -translate-y-1' 
+                          ? `bg-primary ${shouldReduceAnimations ? '' : 'scale-110 -translate-y-1'}` 
                           : 'bg-primary/10'
                       }`}
                       style={{
-                        boxShadow: isHovered 
+                        boxShadow: isHovered && !shouldReduceAnimations
                           ? '0 10px 30px -10px hsl(var(--primary)/0.5)' 
                           : 'none',
                       }}
@@ -161,12 +171,14 @@ const ContactSection = () => {
                         />
                       </div>
                       
-                      {/* Label tooltip */}
-                      <span className={`absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs font-mono text-primary transition-all duration-300 whitespace-nowrap ${
-                        isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-                      }`}>
-                        {social.label}
-                      </span>
+                      {/* Label tooltip - only on desktop */}
+                      {!isMobile && (
+                        <span className={`absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs font-mono text-primary transition-all duration-300 whitespace-nowrap ${
+                          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+                        }`}>
+                          {social.label}
+                        </span>
+                      )}
                     </a>
                   );
                 })}
@@ -174,15 +186,17 @@ const ContactSection = () => {
             </div>
 
             {/* Status card with typing effect */}
-            <div className="p-6 rounded-lg bg-card/50 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_hsl(var(--primary)/0.1)] group">
+            <div className={`p-6 rounded-lg bg-card/50 border border-border hover:border-primary/50 active:border-primary/50 transition-all duration-300 group ${
+              shouldReduceAnimations ? '' : 'hover:shadow-[0_0_20px_hsl(var(--primary)/0.1)]'
+            }`}>
               <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-primary mt-2 animate-pulse" />
-                <p className="text-muted-foreground text-sm font-mono group-hover:text-foreground transition-colors duration-300">
+                <div className={`w-2 h-2 rounded-full bg-primary mt-2 ${shouldReduceAnimations ? '' : 'animate-pulse'}`} />
+                <p className={`text-muted-foreground text-sm font-mono transition-colors duration-300 ${shouldReduceAnimations ? '' : 'group-hover:text-foreground'}`}>
                   <span className="text-primary">{'>'}</span> {t(
                     'Available for senior architecture roles, consulting, and advisory work.',
                     '可接受高级架构职位、咨询和顾问工作。'
                   )}
-                  <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse" />
+                  <span className={`inline-block w-2 h-4 bg-primary ml-1 ${shouldReduceAnimations ? '' : 'animate-pulse'}`} />
                 </p>
               </div>
             </div>
@@ -191,13 +205,13 @@ const ContactSection = () => {
           {/* Contact form with enhanced animations */}
           <form 
             onSubmit={handleSubmit} 
-            className={`space-y-6 transition-all duration-700 delay-200 ${
+            className={`space-y-6 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-200 ${
               staggeredItems[2] ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
             }`}
           >
             {/* Name field */}
             <div className={`space-y-2 transition-all duration-300 ${
-              focusedField === 'name' ? '-translate-y-1' : ''
+              focusedField === 'name' && !shouldReduceAnimations ? '-translate-y-1' : ''
             }`}>
               <Label 
                 htmlFor="name" 
@@ -219,19 +233,21 @@ const ContactSection = () => {
                   placeholder={t('Your name', '您的姓名')}
                   className={`bg-card/50 border-border transition-all duration-300 ${
                     focusedField === 'name' 
-                      ? 'border-primary shadow-[0_0_15px_hsl(var(--primary)/0.2)]' 
+                      ? `border-primary ${shouldReduceAnimations ? '' : 'shadow-[0_0_15px_hsl(var(--primary)/0.2)]'}` 
                       : 'focus:border-primary'
                   }`}
                 />
-                <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                  focusedField === 'name' ? 'w-full' : 'w-0'
-                }`} />
+                {!shouldReduceAnimations && (
+                  <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                    focusedField === 'name' ? 'w-full' : 'w-0'
+                  }`} />
+                )}
               </div>
             </div>
 
             {/* Email field */}
             <div className={`space-y-2 transition-all duration-300 ${
-              focusedField === 'email' ? '-translate-y-1' : ''
+              focusedField === 'email' && !shouldReduceAnimations ? '-translate-y-1' : ''
             }`}>
               <Label 
                 htmlFor="email" 
@@ -254,19 +270,21 @@ const ContactSection = () => {
                   placeholder={t('your@email.com', 'your@email.com')}
                   className={`bg-card/50 border-border transition-all duration-300 ${
                     focusedField === 'email' 
-                      ? 'border-primary shadow-[0_0_15px_hsl(var(--primary)/0.2)]' 
+                      ? `border-primary ${shouldReduceAnimations ? '' : 'shadow-[0_0_15px_hsl(var(--primary)/0.2)]'}` 
                       : 'focus:border-primary'
                   }`}
                 />
-                <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                  focusedField === 'email' ? 'w-full' : 'w-0'
-                }`} />
+                {!shouldReduceAnimations && (
+                  <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                    focusedField === 'email' ? 'w-full' : 'w-0'
+                  }`} />
+                )}
               </div>
             </div>
 
             {/* Message field */}
             <div className={`space-y-2 transition-all duration-300 ${
-              focusedField === 'message' ? '-translate-y-1' : ''
+              focusedField === 'message' && !shouldReduceAnimations ? '-translate-y-1' : ''
             }`}>
               <Label 
                 htmlFor="message" 
@@ -292,13 +310,15 @@ const ContactSection = () => {
                   rows={5}
                   className={`bg-card/50 border-border resize-none transition-all duration-300 ${
                     focusedField === 'message' 
-                      ? 'border-primary shadow-[0_0_15px_hsl(var(--primary)/0.2)]' 
+                      ? `border-primary ${shouldReduceAnimations ? '' : 'shadow-[0_0_15px_hsl(var(--primary)/0.2)]'}` 
                       : 'focus:border-primary'
                   }`}
                 />
-                <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                  focusedField === 'message' ? 'w-full' : 'w-0'
-                }`} />
+                {!shouldReduceAnimations && (
+                  <div className={`absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                    focusedField === 'message' ? 'w-full' : 'w-0'
+                  }`} />
+                )}
               </div>
             </div>
 
@@ -306,10 +326,14 @@ const ContactSection = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="relative w-full overflow-hidden bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)] group"
+              className={`relative w-full overflow-hidden bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/90 transition-all duration-300 group ${
+                shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.5)]'
+              }`}
             >
-              {/* Shine effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
+              {/* Shine effect - only on desktop */}
+              {!shouldReduceAnimations && (
+                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
+              )}
               
               <span className="relative flex items-center justify-center gap-2">
                 {isSubmitting ? (
@@ -319,7 +343,7 @@ const ContactSection = () => {
                   </>
                 ) : (
                   <>
-                    <Send size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+                    <Send size={18} className={shouldReduceAnimations ? '' : 'group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300'} />
                     {t('Send Message', '发送消息')}
                   </>
                 )}
@@ -329,10 +353,10 @@ const ContactSection = () => {
         </div>
 
         {/* Footer with animation */}
-        <div className={`mt-16 pt-8 border-t border-border text-center transition-all duration-700 delay-300 ${
+        <div className={`mt-16 pt-8 border-t border-border text-center transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-300 ${
           staggeredItems[3] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <p className="text-muted-foreground text-sm font-mono hover:text-foreground transition-colors duration-300">
+          <p className={`text-muted-foreground text-sm font-mono transition-colors duration-300 ${shouldReduceAnimations ? '' : 'hover:text-foreground'}`}>
             {'© '}{new Date().getFullYear()} {t('Deming Song', '宋德明')} {'// '} 
             {t('Built with React + TypeScript', '使用 React + TypeScript 构建')}
           </p>
