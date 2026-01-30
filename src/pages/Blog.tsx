@@ -13,13 +13,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Calendar, ChevronRight, Menu, X } from 'lucide-react';
-import { getSortedBlogPosts, getBlogPostById, type BlogPost } from '@/data/blog';
+import { getSortedBlogPosts, getBlogPostById, loadBlogContent, type BlogPost } from '@/data/blog';
 
 const BlogContent = () => {
   const { t } = useLanguage();
   const { shouldReduceAnimations, isMobile } = useMobileOptimized();
   const [searchParams, setSearchParams] = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [content, setContent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
   
   const posts = getSortedBlogPosts();
   const selectedPostId = searchParams.get('post') || posts[0]?.id;
@@ -30,10 +32,17 @@ const BlogContent = () => {
     setSidebarOpen(!isMobile);
   }, [isMobile]);
 
-  // Scroll to top when post changes
+  // Load blog content when post changes
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [selectedPostId]);
+    if (selectedPost) {
+      setIsLoading(true);
+      loadBlogContent(selectedPost.filePath).then((markdownContent) => {
+        setContent(markdownContent);
+        setIsLoading(false);
+        window.scrollTo(0, 0);
+      });
+    }
+  }, [selectedPost]);
 
   const selectPost = (postId: string) => {
     setSearchParams({ post: postId });
@@ -194,95 +203,101 @@ const BlogContent = () => {
 
               {/* Article content */}
               <div className="prose prose-invert prose-primary max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    h1: ({ children }) => (
-                      <h1 className="text-3xl font-bold text-foreground mt-8 mb-4">{children}</h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className="text-2xl font-bold text-foreground mt-8 mb-4 flex items-center gap-2">
-                        <span className="text-primary">##</span> {children}
-                      </h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">{children}</h3>
-                    ),
-                    p: ({ children }) => (
-                      <p className="text-foreground/90 leading-relaxed mb-4">{children}</p>
-                    ),
-                    ul: ({ children }) => (
-                      <ul className="list-none space-y-2 mb-4">{children}</ul>
-                    ),
-                    ol: ({ children }) => (
-                      <ol className="list-decimal list-inside space-y-2 mb-4 text-foreground/90">{children}</ol>
-                    ),
-                    li: ({ children }) => (
-                      <li className="flex items-start gap-2 text-foreground/90">
-                        <ChevronRight size={16} className="flex-shrink-0 mt-1 text-primary" />
-                        <span>{children}</span>
-                      </li>
-                    ),
-                    code: ({ className, children }) => {
-                      const isInline = !className;
-                      if (isInline) {
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({ children }) => (
+                        <h1 className="text-3xl font-bold text-foreground mt-8 mb-4">{children}</h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="text-2xl font-bold text-foreground mt-8 mb-4 flex items-center gap-2">
+                          <span className="text-primary">##</span> {children}
+                        </h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className="text-xl font-semibold text-foreground mt-6 mb-3">{children}</h3>
+                      ),
+                      p: ({ children }) => (
+                        <p className="text-foreground/90 leading-relaxed mb-4">{children}</p>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-none space-y-2 mb-4">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal list-inside space-y-2 mb-4 text-foreground/90">{children}</ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className="flex items-start gap-2 text-foreground/90">
+                          <ChevronRight size={16} className="flex-shrink-0 mt-1 text-primary" />
+                          <span>{children}</span>
+                        </li>
+                      ),
+                      code: ({ className, children }) => {
+                        const isInline = !className;
+                        if (isInline) {
+                          return (
+                            <code className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-sm">
+                              {children}
+                            </code>
+                          );
+                        }
                         return (
-                          <code className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-sm">
+                          <code className="block p-4 rounded-lg bg-card/80 border border-border overflow-x-auto font-mono text-sm text-foreground/90 whitespace-pre">
                             {children}
                           </code>
                         );
-                      }
-                      return (
-                        <code className="block p-4 rounded-lg bg-card/80 border border-border overflow-x-auto font-mono text-sm text-foreground/90">
+                      },
+                      pre: ({ children }) => (
+                        <pre className="mb-4 overflow-x-auto">{children}</pre>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4">
                           {children}
-                        </code>
-                      );
-                    },
-                    pre: ({ children }) => (
-                      <pre className="mb-4 overflow-x-auto">{children}</pre>
-                    ),
-                    blockquote: ({ children }) => (
-                      <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground my-4">
-                        {children}
-                      </blockquote>
-                    ),
-                    a: ({ href, children }) => (
-                      <Link
-                        to={href || '#'}
-                        className="text-primary hover:underline transition-colors"
-                      >
-                        {children}
-                      </Link>
-                    ),
-                    table: ({ children }) => (
-                      <div className="overflow-x-auto mb-4">
-                        <table className="w-full border-collapse border border-border rounded-lg overflow-hidden">
+                        </blockquote>
+                      ),
+                      a: ({ href, children }) => (
+                        <Link
+                          to={href || '#'}
+                          className="text-primary hover:underline transition-colors"
+                        >
                           {children}
-                        </table>
-                      </div>
-                    ),
-                    thead: ({ children }) => (
-                      <thead className="bg-primary/10">{children}</thead>
-                    ),
-                    th: ({ children }) => (
-                      <th className="px-4 py-2 text-left text-primary font-semibold border-b border-border">
-                        {children}
-                      </th>
-                    ),
-                    td: ({ children }) => (
-                      <td className="px-4 py-2 text-foreground/90 border-b border-border">
-                        {children}
-                      </td>
-                    ),
-                    hr: () => <hr className="my-8 border-border" />,
-                    em: ({ children }) => <em className="text-primary/80">{children}</em>,
-                    strong: ({ children }) => (
-                      <strong className="font-semibold text-foreground">{children}</strong>
-                    ),
-                  }}
-                >
-                  {selectedPost.content}
-                </ReactMarkdown>
+                        </Link>
+                      ),
+                      table: ({ children }) => (
+                        <div className="overflow-x-auto mb-4">
+                          <table className="w-full border-collapse border border-border rounded-lg overflow-hidden">
+                            {children}
+                          </table>
+                        </div>
+                      ),
+                      thead: ({ children }) => (
+                        <thead className="bg-primary/10">{children}</thead>
+                      ),
+                      th: ({ children }) => (
+                        <th className="px-4 py-2 text-left text-primary font-semibold border-b border-border">
+                          {children}
+                        </th>
+                      ),
+                      td: ({ children }) => (
+                        <td className="px-4 py-2 text-foreground/90 border-b border-border">
+                          {children}
+                        </td>
+                      ),
+                      hr: () => <hr className="my-8 border-border" />,
+                      em: ({ children }) => <em className="text-primary/80">{children}</em>,
+                      strong: ({ children }) => (
+                        <strong className="font-semibold text-foreground">{children}</strong>
+                      ),
+                    }}
+                  >
+                    {content}
+                  </ReactMarkdown>
+                )}
               </div>
 
               {/* Article footer */}
