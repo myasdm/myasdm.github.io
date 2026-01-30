@@ -1,35 +1,45 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
 const Navigation = () => {
   const { language, toggleLanguage, t } = useLanguage();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
 
+  const isHomePage = location.pathname === '/';
+  const isBlogPage = location.pathname === '/blog';
+
   const navItems = [
-    { id: 'hero', en: 'Home', zh: '首页' },
-    { id: 'credibility', en: 'About', zh: '关于' },
-    { id: 'cases', en: 'Projects', zh: '项目' },
-    { id: 'how-i-work', en: 'Approach', zh: '方法' },
-    { id: 'timeline', en: 'Experience', zh: '经历' },
-    { id: 'contact', en: 'Contact', zh: '联系' },
+    { id: 'hero', en: 'Home', zh: '首页', isSection: true },
+    { id: 'credibility', en: 'About', zh: '关于', isSection: true },
+    { id: 'cases', en: 'Projects', zh: '项目', isSection: true },
+    { id: 'how-i-work', en: 'Approach', zh: '方法', isSection: true },
+    { id: 'timeline', en: 'Experience', zh: '经历', isSection: true },
+    { id: 'blog', en: 'Blog', zh: '博客', isSection: false, path: '/blog' },
+    { id: 'contact', en: 'Contact', zh: '联系', isSection: true },
   ];
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
 
+      if (!isHomePage) return;
+
       // Update active section based on scroll position
-      const sections = navItems.map(item => document.getElementById(item.id));
+      const sectionItems = navItems.filter(item => item.isSection);
+      const sections = sectionItems.map(item => document.getElementById(item.id));
       const scrollPosition = window.scrollY + 100;
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const section = sections[i];
         if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(navItems[i].id);
+          setActiveSection(sectionItems[i].id);
           break;
         }
       }
@@ -37,14 +47,42 @@ const Navigation = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isHomePage]);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+  const handleNavClick = (item: typeof navItems[0]) => {
+    setIsMobileMenuOpen(false);
+    
+    if (!item.isSection && item.path) {
+      // Navigate to different page
+      navigate(item.path);
+    } else if (item.isSection) {
+      if (isHomePage) {
+        // Scroll to section on home page
+        const element = document.getElementById(item.id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        // Navigate to home page with hash
+        navigate(`/#${item.id}`);
+      }
+    }
+  };
+
+  const handleLogoClick = () => {
+    if (isHomePage) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
     }
     setIsMobileMenuOpen(false);
+  };
+
+  const isActiveItem = (item: typeof navItems[0]) => {
+    if (!item.isSection && item.path) {
+      return location.pathname === item.path;
+    }
+    return isHomePage && activeSection === item.id;
   };
 
   return (
@@ -59,7 +97,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo / Name */}
           <button
-            onClick={() => scrollToSection('hero')}
+            onClick={handleLogoClick}
             className="text-lg font-bold text-primary hover-glow"
           >
             {t('Deming Song', '宋德明')}
@@ -70,9 +108,9 @@ const Navigation = () => {
             {navItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
+                onClick={() => handleNavClick(item)}
                 className={`text-sm transition-all duration-200 hover-glow ${
-                  activeSection === item.id
+                  isActiveItem(item)
                     ? 'text-primary glow-primary'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -119,9 +157,9 @@ const Navigation = () => {
             {navItems.map(item => (
               <button
                 key={item.id}
-                onClick={() => scrollToSection(item.id)}
+                onClick={() => handleNavClick(item)}
                 className={`block w-full text-left py-3 px-4 transition-all duration-200 ${
-                  activeSection === item.id
+                  isActiveItem(item)
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground hover:text-foreground hover:bg-primary/5'
                 }`}
