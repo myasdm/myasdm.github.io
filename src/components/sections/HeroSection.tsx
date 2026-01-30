@@ -252,7 +252,7 @@ const HeroSection = () => {
 
         {/* CTA Buttons with staggered animation */}
         <div 
-          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-800 ${
+          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-24 md:mb-28 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-800 ${
             loadingComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
@@ -299,7 +299,7 @@ const HeroSection = () => {
         {/* Scroll indicator with enhanced animation - simplified on mobile */}
         <button
           onClick={scrollToCredibility}
-          className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-1000 ${
+          className={`absolute bottom-4 md:bottom-6 left-1/2 transform -translate-x-1/2 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-1000 ${
             loadingComplete ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
