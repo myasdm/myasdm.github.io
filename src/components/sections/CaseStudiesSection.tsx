@@ -1,95 +1,30 @@
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Globe, Building2, Radio, ArrowRight } from 'lucide-react';
+import { useMobileOptimized } from '@/hooks/useMobileOptimized';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import CaseCard from '@/components/CaseCard';
+import { featuredCases } from '@/data/cases';
 
 const CaseStudiesSection = () => {
   const { ref, isVisible } = useScrollReveal();
-  const casesVisible = useStaggeredReveal(3, isVisible, 200);
+  const casesVisible = useStaggeredReveal(featuredCases.length, isVisible, 200);
   const { t } = useLanguage();
-
-  const cases = [
-    {
-      icon: Globe,
-      titleEn: 'MYA Cards Global Platform',
-      titleZh: 'MYA卡牌全球平台',
-      roleEn: 'Chief Architect / Tech Lead',
-      roleZh: '首席架构师 / 技术负责人',
-      contextEn: 'Education + gaming card trading platform, dual-region (overseas + China)',
-      contextZh: '教育+游戏卡牌交易平台，海外与国内双区部署',
-      actionsEn: [
-        'Designed global API gateway for multi-region routing',
-        'Built card ownership verification system (<200ms)',
-        'Completed dual-cloud migration in 1 week',
-      ],
-      actionsZh: [
-        '设计全球API网关实现多区域路由',
-        '构建卡牌所有权验证系统（<200ms响应）',
-        '1周内完成双云迁移',
-      ],
-      outcomeEn: '0-to-1 platform launch in 5 months, 99.95% uptime, <0.1% complaint rate',
-      outcomeZh: '5个月从0到1上线，99.95%可用性，<0.1%投诉率',
-      tags: ['Global', 'API Gateway', 'Multi-Cloud'],
-    },
-    {
-      icon: Building2,
-      titleEn: 'Shanghai Smart City GIS Platform',
-      titleZh: '上海智慧城市GIS平台',
-      roleEn: 'Senior Architect (led 2-person R&D team)',
-      roleZh: '高级架构师（带领2人研发团队）',
-      contextEn: 'City-level spatial data infrastructure serving 40+ government bureaus',
-      contextZh: '城市级空间数据基础设施，服务40+政府委办局',
-      actionsEn: [
-        'Architected GeoScene + 3D tile + MinIO stack',
-        'Authored feasibility report',
-        'Designed real-time data integration pipeline',
-      ],
-      actionsZh: [
-        '架构GeoScene + 3D瓦片 + MinIO技术栈',
-        '编写可行性研究报告',
-        '设计实时数据集成管道',
-      ],
-      outcomeEn: 'Image processing 18h→2h (9x faster); secured 40M CNY government funding',
-      outcomeZh: '影像处理18小时→2小时（提速9倍）；获得4000万政府资金支持',
-      tags: ['GIS', '3D Visualization', 'Government'],
-    },
-    {
-      icon: Radio,
-      titleEn: 'IoT Platform (Gas IoT)',
-      titleZh: '物联网平台（燃气IoT）',
-      roleEn: 'Senior Tech Manager (led 6-person team)',
-      roleZh: '高级技术经理（带领6人团队）',
-      contextEn: 'Enterprise IoT for 2M+ gas meters and 300k alarms',
-      contextZh: '企业级物联网平台，200万+燃气表，30万告警设备',
-      actionsEn: [
-        'Built million-connection gateway (Netty + MQTT)',
-        'Implemented sharding for message ordering',
-        'Optimized real-time alarm processing pipeline',
-      ],
-      actionsZh: [
-        '构建百万连接网关（Netty + MQTT）',
-        '实现分片策略保证消息顺序',
-        '优化实时告警处理管道',
-      ],
-      outcomeEn: '10x QPS improvement (1k→10k); <0.01% message disorder rate',
-      outcomeZh: 'QPS提升10倍（1k→10k）；消息乱序率<0.01%',
-      tags: ['IoT', 'High Concurrency', 'Real-time'],
-    },
-  ];
+  const { shouldReduceAnimations } = useMobileOptimized();
 
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
       id="cases"
-      className={`py-20 px-4 bg-card/20 transition-all duration-700 ${
+      className={`py-20 px-4 bg-card/20 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
     >
       <div className="container mx-auto max-w-5xl">
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="text-primary text-sm font-mono mb-2 block">
+          <span className={`text-primary text-sm font-mono mb-2 block ${shouldReduceAnimations ? '' : 'animate-pulse'}`}>
             {'// '}{t('featured_projects', '精选项目')}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -105,80 +40,36 @@ const CaseStudiesSection = () => {
 
         {/* Cases */}
         <div className="space-y-8">
-          {cases.map((caseItem, index) => {
-            const Icon = caseItem.icon;
-            return (
-              <Card
-                key={index}
-                className={`group bg-card/50 border-border transition-all duration-300 overflow-hidden cursor-default
-                  hover:border-primary/70 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_hsl(var(--primary)/0.3),0_0_20px_hsl(var(--primary)/0.1)]
-                  ${casesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.4)]">
-                      <Icon className="text-primary transition-transform duration-300 group-hover:scale-110" size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-xl md:text-2xl text-foreground mb-2">
-                        {t(caseItem.titleEn, caseItem.titleZh)}
-                      </CardTitle>
-                      <p className="text-sm text-primary font-mono">
-                        {t(caseItem.roleEn, caseItem.roleZh)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {caseItem.tags.map((tag, tagIndex) => (
-                      <Badge
-                        key={tagIndex}
-                        variant="secondary"
-                        className="bg-primary/10 text-primary border-primary/20"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Context */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      {t('Context', '背景')}
-                    </h4>
-                    <p className="text-foreground">
-                      {t(caseItem.contextEn, caseItem.contextZh)}
-                    </p>
-                  </div>
+          {featuredCases.map((caseItem, index) => (
+            <CaseCard
+              key={index}
+              caseItem={caseItem}
+              isVisible={casesVisible[index]}
+            />
+          ))}
+        </div>
 
-                  {/* Actions */}
-                  <div>
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      {t('What I Did', '我的工作')}
-                    </h4>
-                    <ul className="space-y-2">
-                      {(t(caseItem.actionsEn.join('|||'), caseItem.actionsZh.join('|||'))).split('|||').map((action, actionIndex) => (
-                        <li key={actionIndex} className="flex items-start gap-2 text-foreground">
-                          <ArrowRight className="flex-shrink-0 mt-1 text-primary" size={14} />
-                          <span>{action}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Outcome */}
-                  <div className="pt-4 border-t border-border">
-                    <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                      {t('Outcome', '成果')}
-                    </h4>
-                    <p className="text-primary font-medium glow-primary">
-                      {t(caseItem.outcomeEn, caseItem.outcomeZh)}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+        {/* More Cases Button */}
+        <div className={`mt-12 text-center transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-500 ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}>
+          <Link to="/cases">
+            <Button
+              variant="outline"
+              size="lg"
+              className={`group border-primary/30 hover:border-primary active:border-primary hover:bg-primary/10 active:bg-primary/10 text-primary px-8 py-6 text-lg transition-all duration-300 ${
+                shouldReduceAnimations ? '' : 'hover:-translate-y-1'
+              }`}
+            >
+              <span className={shouldReduceAnimations ? '' : 'group-hover:mr-2 transition-all duration-300'}>
+                {t('More Cases', '更多案例')}
+              </span>
+              <ArrowRight 
+                size={18} 
+                className={shouldReduceAnimations ? 'ml-2' : 'ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-4 group-hover:translate-x-0'}
+              />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
