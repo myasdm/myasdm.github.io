@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
+import { useMobileOptimized } from '@/hooks/useMobileOptimized';
 import { GraduationCap, Briefcase, ChevronRight } from 'lucide-react';
 
 const TimelineSection = () => {
   const { ref, isVisible } = useScrollReveal();
   const experiencesVisible = useStaggeredReveal(6, isVisible, 150);
   const { t } = useLanguage();
+  const { shouldReduceAnimations, isMobile } = useMobileOptimized();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const experiences = [
@@ -78,18 +80,25 @@ const TimelineSection = () => {
     },
   ];
 
+  // On mobile, use tap instead of hover
+  const handleInteraction = (index: number) => {
+    if (isMobile) {
+      setHoveredIndex(hoveredIndex === index ? null : index);
+    }
+  };
+
   return (
     <section
       ref={ref as React.RefObject<HTMLElement>}
       id="timeline"
-      className={`py-20 px-4 bg-card/20 transition-all duration-700 ${
+      className={`py-20 px-4 bg-card/20 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
       }`}
     >
       <div className="container mx-auto max-w-4xl">
         {/* Section header */}
         <div className="text-center mb-16">
-          <span className="text-primary text-sm font-mono mb-2 block animate-pulse">
+          <span className={`text-primary text-sm font-mono mb-2 block ${shouldReduceAnimations ? '' : 'animate-pulse'}`}>
             {'// '}{t('experience', '工作经历')}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -105,14 +114,16 @@ const TimelineSection = () => {
 
         {/* Timeline */}
         <div className="relative">
-          {/* Animated vertical line */}
+          {/* Animated vertical line - simplified on mobile */}
           <div 
-            className={`absolute left-0 md:left-1/2 top-0 w-px md:transform md:-translate-x-1/2 transition-all duration-1000 ${
+            className={`absolute left-0 md:left-1/2 top-0 w-px md:transform md:-translate-x-1/2 transition-all ${shouldReduceAnimations ? 'duration-500' : 'duration-1000'} ${
               isVisible ? 'h-full' : 'h-0'
             }`}
             style={{
-              background: 'linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.3) 50%, hsl(var(--primary)) 100%)',
-              boxShadow: '0 0 10px hsl(var(--primary)/0.5), 0 0 20px hsl(var(--primary)/0.3)',
+              background: shouldReduceAnimations 
+                ? 'hsl(var(--primary)/0.5)' 
+                : 'linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.3) 50%, hsl(var(--primary)) 100%)',
+              boxShadow: shouldReduceAnimations ? 'none' : '0 0 10px hsl(var(--primary)/0.5), 0 0 20px hsl(var(--primary)/0.3)',
             }}
           />
 
@@ -123,49 +134,54 @@ const TimelineSection = () => {
             return (
               <div
                 key={index}
-                className={`relative flex flex-col md:flex-row items-start mb-12 transition-all duration-500 ${
+                className={`relative flex flex-col md:flex-row items-start mb-12 transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-500'} ${
                   index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                 } ${experiencesVisible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                onMouseEnter={() => !isMobile && setHoveredIndex(index)}
+                onMouseLeave={() => !isMobile && setHoveredIndex(null)}
+                onClick={() => handleInteraction(index)}
               >
-                {/* Enhanced timeline dot with pulse animation */}
+                {/* Enhanced timeline dot - simplified pulse on mobile */}
                 <div 
                   className={`absolute left-0 md:left-1/2 transform -translate-x-1/2 mt-4 z-10 transition-all duration-300 ${
-                    isHovered ? 'scale-150' : 'scale-100'
+                    isHovered && !shouldReduceAnimations ? 'scale-150' : 'scale-100'
                   }`}
                 >
-                  {/* Outer pulse ring */}
-                  <div 
-                    className={`absolute inset-0 w-4 h-4 rounded-full bg-primary/30 ${
-                      isHovered ? 'animate-ping' : ''
-                    }`} 
-                  />
+                  {/* Outer pulse ring - only on desktop */}
+                  {!shouldReduceAnimations && (
+                    <div 
+                      className={`absolute inset-0 w-4 h-4 rounded-full bg-primary/30 ${
+                        isHovered ? 'animate-ping' : ''
+                      }`} 
+                    />
+                  )}
                   {/* Inner dot */}
                   <div 
                     className="relative w-4 h-4 rounded-full bg-primary flex items-center justify-center"
                     style={{
-                      boxShadow: isHovered 
+                      boxShadow: isHovered && !shouldReduceAnimations
                         ? '0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary)/0.5)'
-                        : '0 0 10px hsl(var(--primary)/0.5)',
+                        : shouldReduceAnimations ? 'none' : '0 0 10px hsl(var(--primary)/0.5)',
                     }}
                   >
                     <div className="w-2 h-2 rounded-full bg-primary-foreground" />
                   </div>
                 </div>
 
-                {/* Connector line animation */}
-                <div 
-                  className={`hidden md:block absolute top-6 h-px transition-all duration-500 ${
-                    index % 2 === 0 
-                      ? 'right-1/2 mr-2' 
-                      : 'left-1/2 ml-2'
-                  } ${isHovered ? 'w-8 opacity-100' : 'w-4 opacity-50'}`}
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, hsl(var(--primary)))',
-                    boxShadow: isHovered ? '0 0 10px hsl(var(--primary)/0.5)' : 'none',
-                  }}
-                />
+                {/* Connector line animation - only on desktop */}
+                {!isMobile && (
+                  <div 
+                    className={`hidden md:block absolute top-6 h-px transition-all duration-500 ${
+                      index % 2 === 0 
+                        ? 'right-1/2 mr-2' 
+                        : 'left-1/2 ml-2'
+                    } ${isHovered ? 'w-8 opacity-100' : 'w-4 opacity-50'}`}
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, hsl(var(--primary)))',
+                      boxShadow: isHovered && !shouldReduceAnimations ? '0 0 10px hsl(var(--primary)/0.5)' : 'none',
+                    }}
+                  />
+                )}
 
                 {/* Content card with enhanced hover effects */}
                 <div
@@ -176,11 +192,11 @@ const TimelineSection = () => {
                   <div 
                     className={`group p-5 rounded-lg bg-card/50 border transition-all duration-300 cursor-pointer ${
                       isHovered 
-                        ? 'border-primary bg-card/80 -translate-y-2' 
-                        : 'border-border hover:border-primary/50'
+                        ? `border-primary bg-card/80 ${shouldReduceAnimations ? '' : '-translate-y-2'}` 
+                        : 'border-border hover:border-primary/50 active:border-primary/50'
                     }`}
                     style={{
-                      boxShadow: isHovered 
+                      boxShadow: isHovered && !shouldReduceAnimations
                         ? '0 10px 40px -10px hsl(var(--primary)/0.3), 0 0 20px hsl(var(--primary)/0.1)'
                         : 'none',
                     }}
@@ -195,9 +211,9 @@ const TimelineSection = () => {
                       {t(exp.period, exp.periodZh)}
                     </div>
                     
-                    {/* Title with glow effect */}
+                    {/* Title with glow effect - simplified on mobile */}
                     <h3 className={`text-lg font-semibold text-foreground mb-1 transition-all duration-300 ${
-                      isHovered ? 'glow-primary' : ''
+                      isHovered && !shouldReduceAnimations ? 'glow-primary' : ''
                     }`}>
                       {t(exp.titleEn, exp.titleZh)}
                     </h3>
@@ -214,7 +230,7 @@ const TimelineSection = () => {
                       <ChevronRight 
                         size={14} 
                         className={`transition-transform duration-300 ${
-                          isHovered ? 'translate-x-1' : ''
+                          isHovered && !shouldReduceAnimations ? 'translate-x-1' : ''
                         }`} 
                       />
                       <span>{t(exp.highlightEn, exp.highlightZh)}</span>
@@ -227,16 +243,20 @@ const TimelineSection = () => {
         </div>
 
         {/* Education with enhanced animation */}
-        <div className={`mt-16 text-center transition-all duration-700 delay-500 ${
+        <div className={`mt-16 text-center transition-all ${shouldReduceAnimations ? 'duration-300' : 'duration-700'} delay-500 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <div className="inline-flex items-center gap-4 p-5 rounded-lg bg-card/50 border border-border hover:border-primary/50 hover:-translate-y-1 transition-all duration-300 group cursor-pointer hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)]">
+          <div className={`inline-flex items-center gap-4 p-5 rounded-lg bg-card/50 border border-border hover:border-primary/50 active:border-primary/50 transition-all duration-300 group cursor-pointer ${
+            shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)]'
+          }`}>
             <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <GraduationCap className="relative text-primary group-hover:scale-110 transition-transform duration-300" size={28} />
+              {!shouldReduceAnimations && (
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              )}
+              <GraduationCap className={`relative text-primary transition-transform duration-300 ${shouldReduceAnimations ? '' : 'group-hover:scale-110'}`} size={28} />
             </div>
             <div className="text-left">
-              <p className="text-foreground font-medium group-hover:text-primary transition-colors duration-300">
+              <p className={`text-foreground font-medium transition-colors duration-300 ${shouldReduceAnimations ? '' : 'group-hover:text-primary'}`}>
                 {t("Master's in GIS", 'GIS硕士学位')}
               </p>
               <p className="text-sm text-muted-foreground">
