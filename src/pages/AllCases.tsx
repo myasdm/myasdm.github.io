@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
 import { useScrollReveal, useStaggeredReveal } from '@/hooks/useScrollReveal';
 import { useMobileOptimized } from '@/hooks/useMobileOptimized';
@@ -15,9 +15,21 @@ import { allCases } from '@/data/cases';
 
 const AllCasesContent = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { ref, isVisible } = useScrollReveal();
   const { shouldReduceAnimations } = useMobileOptimized();
   const casesVisible = useStaggeredReveal(allCases.length, isVisible, 100);
+
+  const handleContactClick = () => {
+    navigate('/');
+    // Wait for navigation then scroll to contact section
+    setTimeout(() => {
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
 
   // Scroll to top on mount
   useEffect(() => {
@@ -92,16 +104,15 @@ const AllCasesContent = () => {
                 '有兴趣合作？让我们讨论您的项目。'
               )}
             </p>
-            <Link to="/#contact">
-              <Button
-                size="lg"
-                className={`bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/90 px-8 py-6 text-lg transition-all duration-300 ${
-                  shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.5)]'
-                }`}
-              >
-                {t("Let's Talk", '联系我')}
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              onClick={handleContactClick}
+              className={`bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/90 px-8 py-6 text-lg transition-all duration-300 ${
+                shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.5)]'
+              }`}
+            >
+              {t("Let's Talk", '联系我')}
+            </Button>
           </div>
         </div>
       </main>
