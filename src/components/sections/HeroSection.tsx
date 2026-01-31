@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useMobileOptimized } from "@/hooks/useMobileOptimized";
@@ -10,40 +10,41 @@ const HeroSection = () => {
   const { ref, isVisible } = useScrollReveal({ threshold: 0.2 });
   const { shouldReduceAnimations, isMobile } = useMobileOptimized();
   const [displayText, setDisplayText] = useState("");
-  const [showCursor, setShowCursor] = useState(true);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(true);
 
-  const heroText = t(
+  const heroText = useMemo(() => t(
     "15 years shipping high-scale systems. From 2M+ connected devices to 40+ government bureaus—I architect solutions that perform under pressure.",
     "15年高并发系统架构经验。从200万+物联网设备接入到40+政府委办局共用平台——我专注于构建高性能、可扩展的技术解决方案。",
-  );
+  ), [t]);
 
-  // Simulate terminal loading sequence - faster on mobile
+  // Simulate terminal loading sequence - optimized timing
   useEffect(() => {
-    const delay = shouldReduceAnimations ? 300 : 800;
+    const delay = shouldReduceAnimations ? 200 : 500;
     const timer = setTimeout(() => setLoadingComplete(true), delay);
     return () => clearTimeout(timer);
   }, [shouldReduceAnimations]);
 
-  // Glitch effect trigger - disabled on mobile for performance
+  // Glitch effect trigger - optimized with requestAnimationFrame
   useEffect(() => {
     if (!loadingComplete || shouldReduceAnimations) return;
 
-    const glitchInterval = setInterval(() => {
+    let timeoutId: number;
+    const triggerGlitch = () => {
       setGlitchActive(true);
-      setTimeout(() => setGlitchActive(false), 200);
-    }, 4000);
-
-    return () => clearInterval(glitchInterval);
+      setTimeout(() => setGlitchActive(false), 150);
+      timeoutId = window.setTimeout(triggerGlitch, 4000 + Math.random() * 2000);
+    };
+    
+    timeoutId = window.setTimeout(triggerGlitch, 3000);
+    return () => clearTimeout(timeoutId);
   }, [loadingComplete, shouldReduceAnimations]);
 
-  // Typing effect - faster on mobile
+  // Typing effect - optimized with requestAnimationFrame
   useEffect(() => {
     if (!loadingComplete) return;
 
-    // On mobile, show text immediately for better performance
     if (shouldReduceAnimations) {
       setDisplayText(heroText);
       return;
@@ -51,25 +52,28 @@ const HeroSection = () => {
 
     setDisplayText("");
     let currentIndex = 0;
-    const interval = setInterval(() => {
-      if (currentIndex < heroText.length) {
-        setDisplayText(heroText.slice(0, currentIndex + 1));
+    let animationFrameId: number;
+    let lastTime = 0;
+    const charDelay = 20; // ms per character
+
+    const animate = (timestamp: number) => {
+      if (!lastTime) lastTime = timestamp;
+      const elapsed = timestamp - lastTime;
+
+      if (elapsed >= charDelay && currentIndex < heroText.length) {
         currentIndex++;
-      } else {
-        clearInterval(interval);
+        setDisplayText(heroText.slice(0, currentIndex));
+        lastTime = timestamp;
       }
-    }, 25);
 
-    return () => clearInterval(interval);
+      if (currentIndex < heroText.length) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [heroText, loadingComplete, shouldReduceAnimations]);
-
-  // Cursor blink
-  useEffect(() => {
-    const cursorInterval = setInterval(() => {
-      setShowCursor((prev) => !prev);
-    }, 530);
-    return () => clearInterval(cursorInterval);
-  }, []);
 
   // Hide scroll button on scroll
   useEffect(() => {
@@ -96,56 +100,56 @@ const HeroSection = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center px-4 pt-16 overflow-hidden"
     >
-      {/* Animated background grid - simplified on mobile */}
+      {/* Animated background grid - GPU accelerated */}
       {!shouldReduceAnimations && (
-        <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 opacity-10 hero-element">
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 animate-soft-pulse"
             style={{
               backgroundImage: `
                 linear-gradient(hsl(var(--primary)/0.1) 1px, transparent 1px),
                 linear-gradient(90deg, hsl(var(--primary)/0.1) 1px, transparent 1px)
               `,
               backgroundSize: "50px 50px",
-              animation: "pulse 4s ease-in-out infinite",
             }}
           />
         </div>
       )}
 
-      {/* Floating decorative elements - hidden on mobile for performance */}
+      {/* Floating decorative elements - GPU accelerated */}
       {!isMobile && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {/* Top left code bracket */}
           <div
-            className={`absolute top-20 left-10 text-primary/20 text-6xl font-mono transition-all duration-1000 ${
-              loadingComplete ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
+            className={`absolute top-20 left-10 text-primary/20 text-6xl font-mono hero-fade-up ${
+              loadingComplete ? "visible" : ""
             }`}
+            style={{ transitionDelay: "100ms" }}
           >
             {"</>"}
           </div>
 
           {/* Floating icons */}
           <Code2
-            className={`absolute top-32 right-20 text-primary/30 transition-all duration-1000 delay-300 ${
-              loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"
-            }`}
+            className={`absolute top-32 right-20 text-primary/30 hero-fade-up ${
+              loadingComplete ? "visible" : ""
+            } ${loadingComplete && !shouldReduceAnimations ? "animate-float" : ""}`}
             size={40}
-            style={{ animation: shouldReduceAnimations ? "none" : "float 6s ease-in-out infinite" }}
+            style={{ transitionDelay: "200ms" }}
           />
           <Terminal
-            className={`absolute bottom-40 left-20 text-primary/20 transition-all duration-1000 delay-500 ${
-              loadingComplete ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"
-            }`}
+            className={`absolute bottom-40 left-20 text-primary/20 hero-fade-up ${
+              loadingComplete ? "visible" : ""
+            } ${loadingComplete && !shouldReduceAnimations ? "animate-float-reverse" : ""}`}
             size={50}
-            style={{ animation: shouldReduceAnimations ? "none" : "float 5s ease-in-out infinite reverse" }}
+            style={{ transitionDelay: "300ms" }}
           />
           <Zap
-            className={`absolute top-1/3 right-10 text-accent/30 transition-all duration-1000 delay-700 ${
-              loadingComplete ? "opacity-100 scale-100" : "opacity-0 scale-50"
-            }`}
+            className={`absolute top-1/3 right-10 text-accent/30 hero-scale-in ${
+              loadingComplete ? "visible" : ""
+            } ${loadingComplete && !shouldReduceAnimations ? "animate-float-fast" : ""}`}
             size={30}
-            style={{ animation: shouldReduceAnimations ? "none" : "float 4s ease-in-out infinite" }}
+            style={{ transitionDelay: "400ms" }}
           />
         </div>
       )}
@@ -153,13 +157,11 @@ const HeroSection = () => {
       <div className="container mx-auto max-w-4xl text-center relative z-10">
         {/* Terminal-style header with loading animation */}
         <div
-          className={`mb-6 inline-block transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
+          className={`mb-6 inline-block hero-fade-up ${isVisible ? "visible" : ""}`}
         >
           <div className="flex items-center gap-2 text-muted-foreground text-sm font-mono">
             <span
-              className={`inline-block w-2 h-2 rounded-full ${loadingComplete ? "bg-primary" : "bg-muted-foreground"} ${!shouldReduceAnimations && loadingComplete ? "animate-pulse" : ""}`}
+              className={`inline-block w-2 h-2 rounded-full transition-colors duration-300 ${loadingComplete ? "bg-primary" : "bg-muted-foreground"} ${!shouldReduceAnimations && loadingComplete ? "animate-soft-pulse" : ""}`}
             />
             <span className="text-primary">{">"}</span>
             <span className={!loadingComplete && !shouldReduceAnimations ? "animate-pulse" : ""}>
@@ -175,12 +177,13 @@ const HeroSection = () => {
 
         {/* Name with glitch effect - glitch disabled on mobile */}
         <h1
-          className={`text-4xl md:text-6xl lg:text-7xl font-bold mb-8 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-200 ${
-            loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          className={`text-4xl md:text-6xl lg:text-7xl font-bold mb-8 hero-fade-up ${
+            loadingComplete ? "visible" : ""
           }`}
+          style={{ transitionDelay: "100ms" }}
         >
           <span
-            className="relative inline-block text-foreground"
+            className="relative inline-block text-foreground transition-[text-shadow] duration-150"
             style={{
               textShadow:
                 glitchActive && !shouldReduceAnimations
@@ -195,13 +198,13 @@ const HeroSection = () => {
               <>
                 <span
                   className="absolute inset-0 text-accent opacity-70"
-                  style={{ transform: "translate(2px, -2px)", clipPath: "inset(20% 0 30% 0)" }}
+                  style={{ transform: "translate3d(2px, -2px, 0)", clipPath: "inset(20% 0 30% 0)" }}
                 >
                   {t("Deming Song", "宋德明")}
                 </span>
                 <span
                   className="absolute inset-0 text-primary opacity-70"
-                  style={{ transform: "translate(-2px, 2px)", clipPath: "inset(50% 0 10% 0)" }}
+                  style={{ transform: "translate3d(-2px, 2px, 0)", clipPath: "inset(50% 0 10% 0)" }}
                 >
                   {t("Deming Song", "宋德明")}
                 </span>
@@ -210,9 +213,10 @@ const HeroSection = () => {
           </span>
 
           <span
-            className={`text-muted-foreground text-2xl md:text-3xl lg:text-4xl block mt-4 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-400 ${
-              loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            className={`text-muted-foreground text-2xl md:text-3xl lg:text-4xl block mt-4 hero-fade-up ${
+              loadingComplete ? "visible" : ""
             }`}
+            style={{ transitionDelay: "200ms" }}
           >
             <span className="text-primary">{"<"}</span>
             {t("Senior Architect", "高级架构师")}
@@ -222,11 +226,12 @@ const HeroSection = () => {
 
         {/* Typing effect hero statement */}
         <div
-          className={`min-h-[120px] md:min-h-[100px] mb-10 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-500 ${
-            loadingComplete ? "opacity-100" : "opacity-0"
+          className={`min-h-[120px] md:min-h-[100px] mb-10 hero-scale-in ${
+            loadingComplete ? "visible" : ""
           }`}
+          style={{ transitionDelay: "300ms" }}
         >
-          <div className="relative p-4 md:p-6 rounded-lg bg-card/30 border border-border/50 backdrop-blur-sm">
+          <div className="relative p-4 md:p-6 rounded-lg bg-card/30 border border-border/50 backdrop-blur-sm hero-element">
             {/* Terminal header */}
             <div className="absolute top-0 left-0 right-0 h-8 bg-card/50 rounded-t-lg border-b border-border/50 flex items-center px-3 gap-2">
               <div className="w-3 h-3 rounded-full bg-destructive/60" />
@@ -239,9 +244,7 @@ const HeroSection = () => {
               <span className="text-primary">{"## "}</span>
               {displayText}
               <span
-                className={`inline-block w-[3px] h-5 md:h-6 bg-primary ml-1 align-middle ${
-                  showCursor ? "opacity-100" : "opacity-0"
-                }`}
+                className="inline-block w-[3px] h-5 md:h-6 bg-primary ml-1 align-middle animate-[blink_1s_step-end_infinite]"
               />
             </p>
           </div>
@@ -249,15 +252,16 @@ const HeroSection = () => {
 
         {/* Contact info with animation */}
         <div
-          className={`mb-10 flex items-center justify-center gap-2 text-muted-foreground transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-700 ${
-            loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`mb-10 flex items-center justify-center gap-2 text-muted-foreground hero-fade-up ${
+            loadingComplete ? "visible" : ""
           }`}
+          style={{ transitionDelay: "400ms" }}
         >
           <a
             href="mailto:songdmwork@163.com"
             className="group flex items-center gap-2 px-4 py-2 rounded-full bg-card/30 border border-border/50 hover:border-primary active:border-primary hover:bg-primary/10 active:bg-primary/10 transition-all duration-300"
           >
-            <Mail size={18} className={`text-primary ${!shouldReduceAnimations ? "group-hover:animate-pulse" : ""}`} />
+            <Mail size={18} className="text-primary" />
             <span className="group-hover:text-primary group-active:text-primary transition-colors text-sm md:text-base">
               songdmwork@163.com
             </span>
@@ -266,9 +270,10 @@ const HeroSection = () => {
 
         {/* CTA Buttons with staggered animation */}
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-32 md:mb-36 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-800 ${
-            loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-32 md:mb-36 hero-fade-up ${
+            loadingComplete ? "visible" : ""
           }`}
+          style={{ transitionDelay: "500ms" }}
         >
           <Button
             size="lg"
@@ -282,14 +287,6 @@ const HeroSection = () => {
             {/* Shine effect - only on desktop */}
             {!shouldReduceAnimations && (
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-primary-foreground/20 to-transparent" />
-            )}
-
-            {/* Pulse ring - only on desktop */}
-            {!shouldReduceAnimations && (
-              <span
-                className="absolute inset-0 rounded-md animate-ping bg-primary/20 opacity-0 group-hover:opacity-100"
-                style={{ animationDuration: "1.5s" }}
-              />
             )}
 
             <span className="relative">{t("Let's Talk", "联系我")}</span>
@@ -318,9 +315,10 @@ const HeroSection = () => {
         {/* Scroll indicator with enhanced animation - simplified on mobile */}
         <button
           onClick={scrollToCredibility}
-          className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-1000 ${
-            loadingComplete && showScrollButton ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+          className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 hero-fade-up ${
+            loadingComplete && showScrollButton ? "visible" : "pointer-events-none"
           }`}
+          style={{ transitionDelay: "600ms" }}
         >
           <div className="flex flex-col items-center gap-2 group">
             {!isMobile && (
@@ -331,10 +329,7 @@ const HeroSection = () => {
             <div className="relative">
               {/* Outer ring pulse - only on desktop */}
               {!shouldReduceAnimations && (
-                <div
-                  className="absolute inset-0 w-10 h-10 rounded-full border border-primary/30 animate-ping"
-                  style={{ animationDuration: "2s" }}
-                />
+                <div className="absolute inset-0 w-10 h-10 rounded-full border border-primary/30 animate-soft-pulse" />
               )}
 
               {/* Inner button */}
