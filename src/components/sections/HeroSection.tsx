@@ -13,6 +13,7 @@ const HeroSection = () => {
   const [showCursor, setShowCursor] = useState(true);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [glitchActive, setGlitchActive] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(true);
 
   const heroText = t(
     "15 years shipping high-scale systems. From 2M+ connected devices to 40+ government bureaus—I architect solutions that perform under pressure.",
@@ -68,6 +69,17 @@ const HeroSection = () => {
       setShowCursor((prev) => !prev);
     }, 530);
     return () => clearInterval(cursorInterval);
+  }, []);
+
+  // Hide scroll button on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowScrollButton(scrollY < 100);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToContact = () => {
@@ -307,7 +319,7 @@ const HeroSection = () => {
         <button
           onClick={scrollToCredibility}
           className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-all ${shouldReduceAnimations ? "duration-300" : "duration-700"} delay-1000 ${
-            loadingComplete ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            loadingComplete && showScrollButton ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
           }`}
         >
           <div className="flex flex-col items-center gap-2 group">
