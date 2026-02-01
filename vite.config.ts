@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  base: "resume",
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
