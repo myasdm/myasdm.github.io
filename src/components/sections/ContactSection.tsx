@@ -98,7 +98,7 @@ const ContactSection = () => {
                 {t('Get in touch', '联系我')}
               </h3>
               <a
-                href="mailto:songdeming@gmail.com"
+                href="mailto:songdmwork@163.com"
                 className={`flex items-center gap-4 p-4 rounded-lg bg-card/50 border border-border hover:border-primary active:border-primary transition-all duration-300 ${
                   shouldReduceAnimations ? '' : 'hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)]'
                 }`}
@@ -115,7 +115,7 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <p className={`text-foreground font-medium transition-colors duration-300 ${shouldReduceAnimations ? '' : 'group-hover:text-primary'}`}>
-                    songdeming@gmail.com
+                    songdmwork@163.com
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {t('Click to send email', '点击发送邮件')}
