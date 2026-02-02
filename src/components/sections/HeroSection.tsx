@@ -3,7 +3,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useMobileOptimized } from "@/hooks/useMobileOptimized";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Mail, ArrowDown, Terminal, Code2, Zap } from "lucide-react";
+import avatarImage from "@/assets/avatar.png";
 
 const HeroSection = () => {
   const { t } = useLanguage();
@@ -175,54 +177,65 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Name with glitch effect - glitch disabled on mobile */}
-        <h1
-          className={`text-4xl md:text-6xl lg:text-7xl font-bold mb-8 hero-fade-up ${
+        {/* Avatar and Name with glitch effect */}
+        <div
+          className={`flex flex-col md:flex-row items-center justify-center gap-6 mb-8 hero-fade-up ${
             loadingComplete ? "visible" : ""
           }`}
           style={{ transitionDelay: "100ms" }}
         >
-          <span
-            className="relative inline-block text-foreground transition-[text-shadow] duration-150"
-            style={{
-              textShadow:
-                glitchActive && !shouldReduceAnimations
-                  ? "2px 0 hsl(var(--accent)), -2px 0 hsl(var(--primary))"
-                  : "none",
-            }}
-          >
-            {t("Deming Song", "宋德明")}
+          {/* Avatar */}
+          <Avatar className={`w-24 h-24 md:w-32 md:h-32 border-2 border-primary/50 shadow-[0_0_30px_hsl(var(--primary)/0.3)] hero-scale-in ${loadingComplete ? "visible" : ""}`}>
+            <AvatarImage src={avatarImage} alt={t("Deming Song", "宋德明")} />
+            <AvatarFallback className="text-2xl md:text-3xl bg-card text-primary">DM</AvatarFallback>
+          </Avatar>
 
-            {/* Glitch layers - only on desktop */}
-            {glitchActive && !shouldReduceAnimations && (
-              <>
-                <span
-                  className="absolute inset-0 text-accent opacity-70"
-                  style={{ transform: "translate3d(2px, -2px, 0)", clipPath: "inset(20% 0 30% 0)" }}
-                >
-                  {t("Deming Song", "宋德明")}
-                </span>
-                <span
-                  className="absolute inset-0 text-primary opacity-70"
-                  style={{ transform: "translate3d(-2px, 2px, 0)", clipPath: "inset(50% 0 10% 0)" }}
-                >
-                  {t("Deming Song", "宋德明")}
-                </span>
-              </>
-            )}
-          </span>
+          {/* Name */}
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">
+              <span
+                className="relative inline-block text-foreground transition-[text-shadow] duration-150"
+                style={{
+                  textShadow:
+                    glitchActive && !shouldReduceAnimations
+                      ? "2px 0 hsl(var(--accent)), -2px 0 hsl(var(--primary))"
+                      : "none",
+                }}
+              >
+                {t("Deming Song", "宋德明")}
 
-          <span
-            className={`text-muted-foreground text-2xl md:text-3xl lg:text-4xl block mt-4 hero-fade-up ${
-              loadingComplete ? "visible" : ""
-            }`}
-            style={{ transitionDelay: "200ms" }}
-          >
-            <span className="text-primary">{"<"}</span>
-            {t("Senior Architect", "高级架构师")}
-            <span className="text-primary">{" />"}</span>
-          </span>
-        </h1>
+                {/* Glitch layers - only on desktop */}
+                {glitchActive && !shouldReduceAnimations && (
+                  <>
+                    <span
+                      className="absolute inset-0 text-accent opacity-70"
+                      style={{ transform: "translate3d(2px, -2px, 0)", clipPath: "inset(20% 0 30% 0)" }}
+                    >
+                      {t("Deming Song", "宋德明")}
+                    </span>
+                    <span
+                      className="absolute inset-0 text-primary opacity-70"
+                      style={{ transform: "translate3d(-2px, 2px, 0)", clipPath: "inset(50% 0 10% 0)" }}
+                    >
+                      {t("Deming Song", "宋德明")}
+                    </span>
+                  </>
+                )}
+              </span>
+            </h1>
+
+            <span
+              className={`text-muted-foreground text-2xl md:text-3xl lg:text-4xl block mt-4 hero-fade-up ${
+                loadingComplete ? "visible" : ""
+              }`}
+              style={{ transitionDelay: "200ms" }}
+            >
+              <span className="text-primary">{"<"}</span>
+              {t("Senior Architect", "高级架构师")}
+              <span className="text-primary">{" />"}</span>
+            </span>
+          </div>
+        </div>
 
         {/* Typing effect hero statement */}
         <div
