@@ -12,7 +12,12 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(() => {
+    // Detect browser language preference
+    const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
+    // Check if browser language starts with 'zh' (covers zh-CN, zh-TW, zh-HK, etc.)
+    return browserLang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  });
 
   const toggleLanguage = useCallback(() => {
     setLanguage(prev => prev === 'en' ? 'zh' : 'en');
