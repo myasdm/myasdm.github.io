@@ -14,7 +14,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
     // Detect browser language preference
-    const browserLang = navigator.language || (navigator as any).userLanguage || 'en';
+    const browserLang = navigator.language || 'en';
     // Check if browser language starts with 'zh' (covers zh-CN, zh-TW, zh-HK, etc.)
     return browserLang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
   });

@@ -1,47 +1,28 @@
-import { LanguageProvider } from '@/contexts/LanguageContext';
-import CodeRain from '@/components/CodeRain';
-import CursorGlow from '@/components/CursorGlow';
-import ScrollProgress from '@/components/ScrollProgress';
-import BackToTop from '@/components/BackToTop';
-import Navigation from '@/components/Navigation';
-import HeroSection from '@/components/sections/HeroSection';
-import CredibilitySection from '@/components/sections/CredibilitySection';
-import CaseStudiesSection from '@/components/sections/CaseStudiesSection';
-import HowIWorkSection from '@/components/sections/HowIWorkSection';
-import TimelineSection from '@/components/sections/TimelineSection';
-import ContactSection from '@/components/sections/ContactSection';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import EditorialLayout from '@/components/EditorialLayout';
+import SectionHeading from '@/components/SectionHeading';
+import GovernanceCase from '@/components/GovernanceCase';
+import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { profile, capabilities, governanceCases, principles } from '@/data/profile';
+import { blogPosts } from '@/data/blog';
+import avatar from '@/assets/avatar.png';
 
-const Index = () => {
-  return (
-    <LanguageProvider>
-      <div className="relative min-h-screen bg-background">
-        {/* Matrix code rain background */}
-        <CodeRain />
-        
-        {/* Mouse-following glow effect */}
-        <CursorGlow />
-        
-        {/* Scroll progress indicator */}
-        <ScrollProgress />
-        
-        {/* Back to top button */}
-        <BackToTop />
-        
-        {/* Navigation */}
-        <Navigation />
-        
-        {/* Main content */}
-        <main className="relative z-10">
-          <HeroSection />
-          <CredibilitySection />
-          <CaseStudiesSection />
-          <HowIWorkSection />
-          <TimelineSection />
-          <ContactSection />
-        </main>
-      </div>
-    </LanguageProvider>
-  );
-};
-
-export default Index;
+export default function Index() {
+  const { language, t } = useLanguage();
+  return <EditorialLayout>
+    <section id="hero" className="editorial-container intro-section">
+      <div className="intro-kicker"><p className="eyebrow">{t('Architecture / Governance / Practice', '架构 / 治理 / 实践')}</p><span className="edition-label">{t('A working notebook', '一份持续更新的工作笔记')}</span></div>
+      <h1 className="name-title">{profile.name[language]}<span className="text-primary">.</span></h1>
+      <div className="intro-grid"><div><p className="role-label">{profile.role[language]}</p><h2 className="position-title">{t('Complex systems.', '复杂系统，')}<br/><em>{t('Clear decisions.', '清晰决策。')}</em></h2><p className="intro-description">{profile.introduction[language]}</p><div className="flex flex-wrap gap-3 mt-7"><Button asChild className="rounded-none h-12 px-6"><Link to="/#cases">{t('Explore the work', '查看实践案例')}<ArrowDown size={16}/></Link></Button><Button asChild variant="link" className="h-12 px-5"><Link to="/about">{t('More about me', '了解我的经历')}<ArrowUpRight size={16}/></Link></Button></div></div>
+      <aside className="intro-aside"><div className="byline"><img src={avatar} alt={t('Damon Song illustrated avatar', '宋德明的插画头像')} className="portrait"/><div><p className="font-medium">{profile.name[language]}</p><p className="text-xs text-muted-foreground mt-1">{t('Builder. Practitioner. Advisor.', '构建者 · 实践者 · 顾问')}</p></div></div><p className="eyebrow mt-10 mb-4">{t('Currently', '正在进行')}</p><p className="current-note"><span className="status-dot"/>{profile.now[language]}</p><div className="intro-stats"><div><strong>15<span>+</span></strong><p>{t('years in Java architecture & engineering', '年 Java 架构与研发经验')}</p></div><div><strong>2M<span>+</span></strong><p>{t('connected gas meters', '燃气表接入规模')}</p></div><div><strong>40<span>+</span></strong><p>{t('government bureaus on a shared platform', '委办局共享平台')}</p></div></div></aside></div>
+      <div className="intro-foot"><span>{t('From code to decisions. From decisions to outcomes.', '从代码到判断，从判断到结果。')}</span><Button asChild variant="link" className="px-0 h-auto"><Link to="/#writing">{t('Continue reading', '继续阅读')}<ArrowDown size={14}/></Link></Button></div>
+    </section>
+    <section id="writing" className="editorial-container editorial-section"><SectionHeading number="01" label={t('Writing', '文章')} title={t('Notes from the work.', '实践中的思考。')}><Button asChild variant="link" className="px-0"><Link to="/blog">{t('All writing', '全部文章')}<ArrowUpRight/></Link></Button></SectionHeading><div className="writing-list">{blogPosts.slice(0, 3).map((post, index) => <Link key={post.id} to={`/blog?post=${post.id}`} className="writing-row group"><div className="writing-date"><span className="text-primary">{String(index + 1).padStart(2, '0')}</span><time dateTime={post.date}>{post.date.split('-').join('.')}</time></div><div><p className="eyebrow mb-2">{post.tags[0]}</p><h3>{t(post.title, post.titleZh)}</h3><p className="text-muted-foreground text-sm mt-2 leading-relaxed">{t(post.summary, post.summaryZh)}</p></div><ArrowUpRight className="writing-arrow" size={22}/></Link>)}</div></section>
+    <section id="credibility" className="capabilities-band"><div className="editorial-container editorial-section"><SectionHeading number="02" label={t('Focus', '工作重点')} title={t('Where I can help.', '我关注的问题。')}/><div className="capability-grid">{capabilities.map((item, i) => <div key={i} className="capability-item"><span className="eyebrow text-primary">0{i + 1}</span><h3>{item.title[language]}</h3><p>{item.description[language]}</p><span className="capability-detail">{item.detail[language]}</span></div>)}</div></div></section>
+    <section id="cases" className="editorial-container editorial-section"><SectionHeading number="03" label={t('Selected case logs', '精选案例')} title={t('Decisions, tested in practice.', '经实践检验的决策。')}><Button asChild variant="link" className="px-0"><Link to="/cases">{t('All case logs', '全部案例')}<ArrowUpRight/></Link></Button></SectionHeading>{governanceCases.filter(item => item.featured).map(item => <GovernanceCase key={item.id} item={item} compact/>)}</section>
+    <section id="how-i-work" className="editorial-container editorial-section principles-section"><SectionHeading number="04" label={t('Principles', '工作方式')} title={t('Stay close to reality.', '保持对现实的敏感。')}/><ol>{principles.map((item, i) => <li key={i}><span className="eyebrow">0{i + 1}</span><p>{item[language]}</p></li>)}</ol></section>
+    <section id="contact" className="contact-band"><div className="editorial-container contact-content"><p className="eyebrow">§ 05 / {t('A conversation', '开始对话')}</p><h2>{t('What are you working through?', '你正在面对什么问题？')}</h2><p>{t('An architectural bottleneck, a difficult migration, or a role worth discussing. Start with the context.', '架构瓶颈、复杂迁移，或值得讨论的工作机会。可以先从你的具体情境聊起。')}</p><Button asChild variant="link" className="contact-email"><a href={`mailto:${profile.email}`}>{profile.email}<ArrowUpRight/></a></Button><div className="contact-bottom"><span>{t('Architecture reviews · Technical governance · Senior IC roles', '架构评估 · 技术治理 · 资深个人贡献者岗位')}</span><a href={`tel:${profile.phone.split(' ').join('')}`}>{profile.phone}</a></div></div></section>
+  </EditorialLayout>;
+}
